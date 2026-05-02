@@ -1,0 +1,121 @@
+/* HERO SECTION */
+.hero {
+  position: relative;
+  height: 90vh;
+  background-image: url('./home_background.jpg'); 
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,   
+    rgba(0, 0, 0, 0.1) 10%,  
+    var(--bg-dark) 100%                
+  );
+}
+
+/* overlay */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6); 
+}
+
+.hero-title {
+  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  font-size: clamp(40px, 8vw, 90px);
+  font-family: 'Anton', sans-serif;
+  font-size: 80px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: white;
+}
+
+.hero-title .highlight {
+  color: var(--primary); 
+}
+
+.hero-subtitle {
+  font-family: 'Montserrat', sans-serif; 
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  margin-top: 15px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: fadeUp 1.2s ease;
+}
+
+.hero-content {
+  position: relative;
+  text-align: center;
+  color: white;
+  max-width: 600px;
+  line-height: 2;
+  z-index: 2;
+  line-height: 5;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── EVENTS SECTION ── */
+.events-section {
+  padding: 60px 40px;
+  background: var(--bg-main);
+}
+
+/* Header row: title on the left, "View All" on the right */
+.events-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+
+.events-section-title {
+  font-family: 'Anton', sans-serif;
+  font-size: 2rem;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.events-section-title .highlight {
+  color: var(--primary);
+}
+
+/* 3-column grid for the cards */
+.home-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* Responsive: stack to 1 column on small screens */
+@media (max-width: 900px) {
+  .home-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .home-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .events-section {
+    padding: 40px 20px;
+  }
+}

@@ -1,0 +1,258 @@
+/* SearchBar.css */
+
+.searchbar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Collapsed pill — the always-visible search icon button */
+.searchbar-toggle {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s, width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.searchbar-toggle:hover {
+  background: rgba(230, 105, 0, 0.12);
+}
+
+.searchbar-toggle svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Expanded panel — drops below the navbar */
+.searchbar-panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  width:550px;
+  background: var(--bg-card);
+  border: 1px solid var(--primary);
+  border-radius: 14px;
+  padding: 16px;
+  z-index: 2000;
+  box-shadow: 0 8px 32px rgba(230, 105, 0, 0.12), 0 2px 8px rgba(0,0,0,0.3);
+  animation: sb-slide-in 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes sb-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Top row: text input + search button */
+.searchbar-top {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.searchbar-input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchbar-input::placeholder {
+  color: var(--text-muted);
+}
+
+.searchbar-input:focus {
+  border-color: var(--primary);
+}
+
+.searchbar-submit {
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--text-main);
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.searchbar-submit:hover {
+  opacity: 0.85;
+}
+
+/* Filters row */
+.searchbar-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.searchbar-filter {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--text-main);
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.searchbar-filter:focus,
+.searchbar-filter:hover {
+  border-color: var(--primary);
+}
+
+/* Style the date input's calendar icon to match theme */
+.searchbar-filter[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(55%) sepia(80%) saturate(500%) hue-rotate(5deg);
+  cursor: pointer;
+}
+
+/* option elements inherit bg from card so they're readable */
+.searchbar-filter option {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+/* Results dropdown */
+.searchbar-results {
+  margin-top: 10px;
+  border-top: 1px solid var(--border, #333);
+  padding-top: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.searchbar-results::-webkit-scrollbar {
+  width: 4px;
+}
+.searchbar-results::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+.searchbar-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.searchbar-result-item:hover {
+  background: rgba(230, 105, 0, 0.08);
+  border-color: rgba(230, 105, 0, 0.2);
+}
+
+.result-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(230,105,0,0.15);
+}
+
+.result-img-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  background: rgba(230, 105, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-meta {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.result-meta span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.result-category-tag {
+  font-size: 0.7rem;
+  background: rgba(230, 105, 0, 0.18);
+  color: var(--primary);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+
+.result-price {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* Status messages */
+.searchbar-status {
+  text-align: center;
+  padding: 12px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.searchbar-status.loading {
+  color: var(--primary);
+}
+
+/* Overlay to close on outside click */
+.searchbar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1999;
+}

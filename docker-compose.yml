@@ -1,0 +1,95 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  user-db:
+    image: mongo:4.4
+    platform: linux/amd64
+
+  ticket-db:
+    image: mongo:4.4
+    platform: linux/amd64
+
+  notification-db:
+    image: mongo:4.4
+    platform: linux/amd64
+
+  event-db:
+    image: mongo:4.4
+    platform: linux/amd64      
+
+  user-service:
+    build: ./event-ticketing-app/user-service
+    ports:
+      - "3001:3000"
+    depends_on:
+      - user-db
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - MONGO_URI=mongodb://user-db:27017/users
+
+  ticket-service:
+    build: ./event-ticketing-app/ticket-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ticket-db
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - MONGO_URI=mongodb://ticket-db:27017/tickets
+
+  notification-service:
+    build: ./event-ticketing-app/notification-service
+    ports:
+      - "3003:3000"
+    depends_on:
+      - notification-db
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - MONGO_URI=mongodb://notification-db:27017/notifications
+
+
+  event-service:
+    build: ./event-ticketing-app/event-service
+    ports:
+      - "3004:3000"
+    depends_on:
+      - event-db
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - MONGO_URI=mongodb://event-db:27017/events
+
+
+
+  
+  dotnet-user-service:
+    build:
+      context: ./event-backend
+      dockerfile: UserService/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka

@@ -1,0 +1,367 @@
+/* src/pages/participant/TicketPage.css */
+/* depends on global.css */
+
+/* ─── Page: dark background, card centered ─── */
+.ticket-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 16px 80px;
+  background: var(--bg-dark);
+}
+
+.ticket-page-inner {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
+}
+
+/* ─── Main Ticket Card ─── */
+.ticket-main-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* ── Orange Header — just the event title, exactly like screenshot ── */
+.ticket-main-header {
+  background: var(--primary);
+  padding: 32px 28px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-event-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* ── Card Body ── */
+.ticket-main-body {
+  padding: 28px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Status badge — shown below header inside body */
+.ticket-status-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.ticket-status-badge.active {
+  color: var(--primary);
+  background: rgba(255, 122, 0, 0.12);
+  border: 1px solid rgba(255, 122, 0, 0.4);
+}
+
+.ticket-status-badge.checkedin {
+  color: var(--success);
+  background: rgba(40, 199, 111, 0.1);
+  border: 1px solid rgba(40, 199, 111, 0.4);
+}
+
+.ticket-status-badge.cancelled {
+  color: var(--danger);
+  background: rgba(234, 84, 85, 0.1);
+  border: 1px solid rgba(234, 84, 85, 0.4);
+}
+
+.ticket-status-badge.expired {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+/* Meta rows — centered text like screenshot */
+.ticket-meta-row {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  padding: 15%;
+}
+
+.ticket-meta-row2{
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  
+}
+
+.ticket-meta-row strong {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* ── QR Area — large, centered, white background box ── */
+.ticket-qr-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8px 0;
+  
+}
+
+.ticket-qr-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* White box wrapping the QR canvas — like screenshot */
+.ticket-qr-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.ticket-qr-canvas-wrap canvas {
+  border-radius: 4px;
+  display: block;
+}
+
+.ticket-qr-canvas-label {
+  font-size: 0.65rem;
+  color: #555;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.8px;
+  text-align: center;
+  word-break: break-all;
+  max-width: 210px;
+  margin: 0;
+}
+
+/* Cancelled QR placeholder */
+.ticket-cancelled-qr {
+  background: rgba(234, 84, 85, 0.08);
+  border: 1px dashed rgba(234, 84, 85, 0.4);
+  border-radius: 12px;
+  padding: 36px 48px;
+  text-align: center;
+  color: var(--danger);
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticket-cancelled-qr span {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Checked-in notice */
+.ticket-checkedin-notice {
+  font-size: 0.8rem;
+  color: var(--success);
+  font-weight: 600;
+  text-align: center;
+  background: rgba(40, 199, 111, 0.08);
+  border: 1px solid rgba(40, 199, 111, 0.25);
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+/* Purchase time */
+.ticket-purchase-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Separator line before buttons */
+.ticket-inner-sep {
+  border: none;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  margin: 4px 0;
+}
+
+/* ── Action Buttons — inside card at bottom, like screenshot ── */
+.ticket-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* "Back to list" — outline orange button exactly like screenshot */
+.ticket-back-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--radius);
+  padding: 13px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.4px;
+  transition: background 0.2s, color 0.2s;
+  text-align: center;
+}
+
+.ticket-back-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* "Cancel Ticket" — danger outline button */
+.ticket-cancel-action {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 13px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.4px;
+  transition: background 0.2s, color 0.2s;
+  text-align: center;
+}
+
+.ticket-cancel-action:hover:not(:disabled) {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.ticket-cancel-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Review Section (below card) ─── */
+.ticket-review-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+}
+
+.ticket-review-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-review-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.ticket-review-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.ticket-review-header p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.ticket-write-review-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ticket-write-review-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* ─── Review Done Banner ─── */
+.ticket-review-done {
+  background: rgba(40, 199, 111, 0.1);
+  border: 1px solid rgba(40, 199, 111, 0.35);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+/* ─── Not Found ─── */
+.ticket-notfound {
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.ticket-notfound h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 520px) {
+  .ticket-page {
+    padding: 24px 12px 60px;
+  }
+
+  .ticket-main-header {
+    padding: 24px 20px 20px;
+  }
+
+  .ticket-event-title {
+    font-size: 1.15rem;
+  }
+
+  .ticket-main-body {
+    padding: 22px 20px 26px;
+  }
+}

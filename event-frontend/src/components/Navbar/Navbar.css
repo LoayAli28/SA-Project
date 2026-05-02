@@ -1,0 +1,270 @@
+.navbar {
+  background-color: var(--bg-card);
+  padding: 15px 30px;
+  border-bottom: 1px solid var(--primary);
+  color: white;
+}
+
+/* MAIN LAYOUT */
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LEFT */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  width: 60px;
+  cursor: pointer;
+}
+
+.nav-logo {
+  font-weight: bold;
+  font-size:xx-large;
+  color: var(--primary);
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif; 
+
+  
+}
+
+/* MIDDLE */
+.nav-middle {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  
+}
+
+.nav-middle a {
+  color: var(--text-main);
+  background: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: large;
+  transition: 0.5;
+}
+
+.nav-middle a:hover {
+  color: var(--primary);
+  background:none;
+  letter-spacing: 1px;
+  transform: scale(1.1);
+  
+  transform-origin: center;
+  
+  
+}
+
+/* RIGHT */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* GROUP BUTTONS */
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* LOGIN (outline) */
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: var(--text-main);
+}
+
+/* REGISTER (filled) */
+.btn-primary {
+  background: var(--primary);
+  border: none;
+  color: var(--text-main);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+/* LINKS */
+.nav-link {
+  text-decoration: none;
+  color: var(--text-muted);
+}
+
+.nav-link:hover {
+  color: var(--primary);
+}
+
+.nav-link.active {
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 20px;
+
+}
+
+/* NOTIFICATIONS */
+.bell-icon {
+  position: relative;
+  cursor: pointer;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 50%;
+}
+
+/* AVATAR */
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* DROPDOWNS */
+.dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 250px;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* LOGOUT */
+.logout-btn {
+  background: none;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: var(--primary);
+  color: black;
+}
+
+/* dropdown size & position */
+.notif-dropdown {
+  right: 50px;
+  width: 300px;
+}
+
+/* header */
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* mark all */
+.mark-all {
+  font-size: 0.8rem;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+/* no notifications */
+.no-notifs {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* notification item */
+.dropdown-item.unread {
+  border-left: 3px solid var(--primary);
+  opacity: 1;
+}
+
+.dropdown-item.read {
+  opacity: 0.6;
+}
+
+/* text inside notification */
+.notif-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.notif-message {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* profile dropdown */
+.profile-dropdown {
+  min-width: 200px;
+}
+
+/* profile header */
+.profile-header {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 5px;
+}
+
+.profile-name {
+  font-weight: bold;
+}
+
+.profile-role {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* logout danger */
+.logout-item {
+  color: var(--danger);
+}

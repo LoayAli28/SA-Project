@@ -1,0 +1,396 @@
+/* src/pages/participant/MyTickets.css */
+/* depends on global.css */
+
+/* ─── Page Header ─── */
+.tickets-page-header {
+  margin-bottom: 28px;
+}
+
+.tickets-page-header h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0 0 6px 0;
+}
+
+.tickets-page-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ─── Grid ─── */
+.tickets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+@media (max-width: 900px) {
+  .tickets-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 580px) {
+  .tickets-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Card ─── */
+.ticket-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.ticket-card.active {
+  border: 2px solid var(--primary);
+}
+
+/* Cover image */
+.ticket-card-cover {
+  width: 100%;
+  height: 170px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ticket-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s;
+}
+
+.ticket-card:hover .ticket-card-img {
+  transform: scale(1.04);
+}
+
+.ticket-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Card body */
+.ticket-card-body {
+  padding: 14px 16px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Top row: badge + count */
+.ticket-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 99px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.status-badge.upcoming {
+  color: var(--primary);
+  background: rgba(255, 122, 0, 0.13);
+  border: 1px solid rgba(255, 122, 0, 0.45);
+}
+
+.status-badge.completed {
+  color: #a0a0a0;
+  background: rgba(160, 160, 160, 0.1);
+  border: 1px solid #444;
+}
+
+.status-badge.cancelled {
+  color: var(--danger);
+  background: rgba(234, 84, 85, 0.1);
+  border: 1px solid rgba(234, 84, 85, 0.4);
+}
+
+.status-badge.checkedin {
+  color: var(--success);
+  background: rgba(40, 199, 111, 0.1);
+  border: 1px solid rgba(40, 199, 111, 0.4);
+}
+
+.status-badge.unknown {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+/* Ticket count */
+.ticket-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Card title */
+.ticket-card-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+/* Card meta */
+.ticket-card-meta {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Card footer */
+.ticket-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.ticket-card-id {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.ticket-card-action {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.ticket-card-action:hover {
+  color: var(--primary-hover);
+}
+
+/* ─── Detail Section ─── */
+.ticket-detail-section {
+  width: 100%;
+}
+
+.ticket-detail-section h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-main);
+  margin-bottom: 18px;
+}
+
+/* Detail box */
+.ticket-detail-box {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* ── Left panel ── */
+.ticket-detail-left {
+  width: 320px;
+  min-width: 280px;
+  border-right: 1px dashed var(--primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px 36px;
+  gap: 18px;
+}
+
+.ticket-qr-area {
+  width: 152px;
+  height: 152px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-qr-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-pass-label {
+  font-size: 0.65rem;
+  letter-spacing: 2.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.ticket-pass-code {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--text-main);
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+
+/* ── Right panel ── */
+.ticket-detail-right {
+  flex: 1;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+}
+
+.ticket-detail-fields {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 28px;
+}
+
+.ticket-detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ticket-detail-field:first-child {
+  padding-top: 0;
+}
+
+.ticket-detail-label {
+  font-size: 0.67rem;
+  letter-spacing: 1.8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.ticket-detail-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Action buttons */
+.ticket-detail-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Full-width orange button */
+.btn-view-qr {
+  flex: 1;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 15px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: background 0.2s, transform 0.15s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.btn-view-qr:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-view-qr:active {
+  transform: translateY(0);
+}
+
+.ticket-cancel-btn {
+  flex: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .ticket-detail-box {
+    flex-direction: column;
+  }
+
+  .ticket-detail-left {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px dashed var(--primary);
+    padding: 28px 20px;
+  }
+
+  .ticket-detail-right {
+    padding: 28px 24px;
+  }
+
+  .ticket-detail-actions {
+    flex-direction: column;
+  }
+}
+
+/* ─── Empty state ─── */
+.tickets-empty {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 70px 20px;
+  text-align: center;
+}
+
+.tickets-empty h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.tickets-empty p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
