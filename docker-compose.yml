@@ -3,7 +3,8 @@ services:
     image: confluentinc/cp-zookeeper:7.3.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app-network
 
   kafka:
     image: confluentinc/cp-kafka:7.3.0
@@ -16,80 +17,103 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - app-network
 
+  # --- DATABASES ---
   user-db:
     image: mongo:4.4
     platform: linux/amd64
+    networks:
+      - app-network
+
+  event-db:
+    image: mongo:4.4
+    platform: linux/amd64
+    networks:
+      - app-network
 
   ticket-db:
     image: mongo:4.4
     platform: linux/amd64
+    networks:
+      - app-network
 
   notification-db:
     image: mongo:4.4
     platform: linux/amd64
+    networks:
+      - app-network
 
-  event-db:
-    image: mongo:4.4
-    platform: linux/amd64      
+  # --- MICROSERVICES ---
 
   user-service:
-    build: ./event-ticketing-app/user-service
+    build: ./event-backend/user-service
     ports:
-      - "3001:3000"
-    depends_on:
-      - user-db
-      - kafka
+      - "3002:3000"
     environment:
       - KAFKA_BROKER=kafka:9092
       - MONGO_URI=mongodb://user-db:27017/users
+    depends_on:
+      kafka:
+        condition: service_healthy
+      user-db:
+        condition: service_started
+    networks:
+      - app-network
 
   ticket-service:
-    build: ./event-ticketing-app/ticket-service
+    build: ./event-backend/ticket-service
     ports:
-      - "3000:3000"
-    depends_on:
-      - ticket-db
-      - kafka
+      - "3003:3000"
     environment:
       - KAFKA_BROKER=kafka:9092
       - MONGO_URI=mongodb://ticket-db:27017/tickets
-
-  notification-service:
-    build: ./event-ticketing-app/notification-service
-    ports:
-      - "3003:3000"
     depends_on:
-      - notification-db
-      - kafka
-    environment:
-      - KAFKA_BROKER=kafka:9092
-      - MONGO_URI=mongodb://notification-db:27017/notifications
-
+      kafka:
+        condition: service_healthy
+      ticket-db:
+        condition: service_started
+      user-db:
+        condition: service_started
+    networks:
+      - app-network
 
   event-service:
-    build: ./event-ticketing-app/event-service
+    build: ./event-backend/event-service
     ports:
       - "3004:3000"
-    depends_on:
-      - event-db
-      - kafka
     environment:
       - KAFKA_BROKER=kafka:9092
       - MONGO_URI=mongodb://event-db:27017/events
-
-
-
-  
-  dotnet-user-service:
-    build:
-      context: ./event-backend
-      dockerfile: UserService/Dockerfile
-    ports:
-      - "5000:8080"
-    environment:
-      - ASPNETCORE_URLS=http://+:8080
-      - KAFKA_BROKER=kafka:9092
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
+      event-db:
+        condition: service_started
+    networks:
+      - app-network
+
+  notification-service:
+    build: ./event-backend/notification-service
+    ports:
+      - "3005:3000"
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - MONGO_URI=mongodb://notification-db:27017/notifications
+    depends_on:
+      kafka:
+        condition: service_healthy
+      notification-db:
+        condition: service_started
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

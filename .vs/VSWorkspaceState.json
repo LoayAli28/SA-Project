@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\event-backend",
+    "\\event-backend\\DotNetService",
+    "\\event-frontend"
+  ],
+  "SelectedNode": "\\event-backend\\DotNetService\\UserService.csproj",
+  "PreviewInSolutionExplorer": false
+}

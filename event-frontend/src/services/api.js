@@ -3,17 +3,17 @@ import axios from 'axios';
 
 
 const api = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: 'http://localhost:3002', // Node.js User Service
 });
 
 
 export const ticketApi = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://localhost:3003',
 });
 
 
 export const notifApi = axios.create({
-  baseURL: 'http://localhost:3003',
+  baseURL: 'http://localhost:3005',
 });
 
 
