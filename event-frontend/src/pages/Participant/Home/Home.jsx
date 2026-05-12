@@ -6,17 +6,22 @@ import { getAllEvents } from '../../../services/eventService';
 import './Home.css';
 
 export default function Home() {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents]   = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const navigate              = useNavigate();
 
   useEffect(() => {
-    getAllEvents({ pageSize: 6 }).then(res => {
-      // ServiceResult<PagedResult<EventResponseDto>> → .data.items
-      const items = res?.data?.items || [];
-      setEvents(items);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    getAllEvents()
+      .then(res => {
+        // Backend returns a plain array of events
+        const data = res?.data;
+        const items = Array.isArray(data) ? data
+          : Array.isArray(data?.items) ? data.items
+          : [];
+        setEvents(items);
+      })
+      .catch(() => setEvents([]))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -26,7 +31,7 @@ export default function Home() {
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="hero-title">
-            DISCOVER & <br />
+            DISCOVER &amp; <br />
             ATTEND <span className="highlight">AMAZING</span> <br />
             EVENTS
           </h1>
@@ -46,10 +51,7 @@ export default function Home() {
           <h2 className="events-section-title">
             Featured <span className="highlight">Events</span>
           </h2>
-          <button
-            className="btn-outline"
-            onClick={() => navigate('/events')}
-          >
+          <button className="btn-outline" onClick={() => navigate('/events')}>
             View All →
           </button>
         </div>
@@ -62,14 +64,10 @@ export default function Home() {
           </p>
         ) : (
           <div className="home-cards-grid">
-          {Array.isArray(events) ? (
-    events.slice(0, 6).map(event => (
-      <EventCard key={event.eventId} event={event} />
-    ))
-  ) : (
-    <p>Loading events...</p>
-  )}
-</div>
+            {events.slice(0, 6).map(event => (
+              <EventCard key={event._id || event.eventId} event={event} />
+            ))}
+          </div>
         )}
       </section>
     </div>

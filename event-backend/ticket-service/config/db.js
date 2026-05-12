@@ -6,7 +6,7 @@ let userDbConnection;
 
 const connectDB = async () => {
     try {
-        // Primary DB for tickets
+        //DB for tickets
         ticketDbConnection = await mongoose.connect(env.MONGO_URI);
         console.log('Ticket DB Connected');
 

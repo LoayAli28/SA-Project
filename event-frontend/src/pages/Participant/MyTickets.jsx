@@ -36,7 +36,7 @@ export default function MyTickets() {
   }, []);
 
   const handleCancel = async (ticketId) => {
-    if (!window.confirm('Cancel this ticket?')) return;
+    if (!window.confirm('Cancel this ticket? Your seat will be released.')) return;
     try {
       await cancelTicket(ticketId);
       setTickets((prev) =>
@@ -45,7 +45,7 @@ export default function MyTickets() {
         )
       );
     } catch (err) {
-      alert(err.response?.data?.message || 'Cancel failed');
+      alert(err.response?.data?.error || err.response?.data?.message || 'Cancel failed');
     }
   };
 

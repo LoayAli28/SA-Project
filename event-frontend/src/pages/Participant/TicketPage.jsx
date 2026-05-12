@@ -76,13 +76,13 @@ export default function TicketPage() {
   }, [id]);
 
   const handleCancel = async () => {
-    if (!window.confirm('Are you sure you want to cancel this ticket?')) return;
+    if (!window.confirm('Are you sure you want to cancel this ticket? Your seat will be released.')) return;
     setCanceling(true);
     try {
       await cancelTicket(ticket.ticketId);
       setTicket(prev => ({ ...prev, status: 'Cancelled' }));
     } catch (err) {
-      alert(err.response?.data?.message || 'Cancel failed');
+      alert(err.response?.data?.error || err.response?.data?.message || 'Cancel failed');
     } finally {
       setCanceling(false);
     }

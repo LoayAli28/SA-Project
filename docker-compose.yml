@@ -25,7 +25,6 @@ services:
     networks:
       - app-network
 
-  # --- DATABASES ---
   user-db:
     image: mongo:4.4
     platform: linux/amd64
@@ -50,8 +49,6 @@ services:
     networks:
       - app-network
 
-  # --- MICROSERVICES ---
-
   user-service:
     build: ./event-backend/user-service
     ports:
@@ -62,23 +59,6 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-      user-db:
-        condition: service_started
-    networks:
-      - app-network
-
-  ticket-service:
-    build: ./event-backend/ticket-service
-    ports:
-      - "3003:3000"
-    environment:
-      - KAFKA_BROKER=kafka:9092
-      - MONGO_URI=mongodb://ticket-db:27017/tickets
-    depends_on:
-      kafka:
-        condition: service_healthy
-      ticket-db:
-        condition: service_started
       user-db:
         condition: service_started
     networks:
@@ -95,6 +75,27 @@ services:
       kafka:
         condition: service_healthy
       event-db:
+        condition: service_started
+    networks:
+      - app-network
+
+  ticket-service:
+    build: ./event-backend/ticket-service
+    ports:
+      - "3003:3000"
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - MONGO_URI=mongodb://ticket-db:27017/tickets
+      - USER_DB_URI=mongodb://user-db:27017/users
+      - EVENT_SERVICE_URL=http://event-service:3000
+    depends_on:
+      kafka:
+        condition: service_healthy
+      ticket-db:
+        condition: service_started
+      user-db:
+        condition: service_started
+      event-service:
         condition: service_started
     networks:
       - app-network

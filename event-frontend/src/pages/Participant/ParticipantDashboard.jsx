@@ -28,9 +28,19 @@ export default function ParticipantDashboard() {
     (e) => (e._id || e.eventId) === selectedEventId
   );
 
+  // Refresh events list after booking to update seat counts
+  const refreshEvents = () => {
+    getEvents()
+      .then(res => {
+        const data = res?.data || [];
+        setEvents(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {});
+  };
+
   const generateSeats = (event) => {
     if (!event) return [];
-    const total = event.capacity || event.totalSeats || 10;
+    const total = event.availableSeats || event.totalTickets || 10;
     const seats = [];
     const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
     let count = 0;
@@ -58,11 +68,12 @@ export default function ParticipantDashboard() {
         eventDate:     selectedEvent?.date,
         eventLocation: selectedEvent?.location,
       });
-      setMessage(`Ticket booked for seat ${selectedSeat}! `);
+      setMessage(`✅ Ticket booked for seat ${selectedSeat}! Your seat has been reserved.`);
       setSelectedEventId('');
       setSelectedSeat('');
+      refreshEvents();  // update seat counts
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Booking failed');
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || 'Booking failed');
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-// Simple manual validator, in a real app you might use Joi or express-validator
+
 const validateRegistration = (req, res, next) => {
     const { email, password } = req.body;
     

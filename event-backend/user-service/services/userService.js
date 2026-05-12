@@ -14,7 +14,7 @@ class UserService {
 
         const newUser = await User.create({
             email,
-            password, // Will be hashed by pre-save hook in Model
+            password, 
             firstName,
             lastName,
             phoneNumber,
@@ -22,8 +22,7 @@ class UserService {
             organizationName
         });
 
-        // Fire-and-forget Kafka publish — do NOT await this.
-        // Kafka failures must NEVER block or fail the registration response.
+        
         const userEvent = {
             id: newUser._id.toString(),
             email: newUser.email,
@@ -53,9 +52,7 @@ class UserService {
         // Generate JWT token
         const token = jwtUtil.generateToken(user._id.toString(), user.email, user.role);
 
-        // For backwards compatibility with notification-service, you could also return the old 'token-' + id format 
-        // if the frontend relies on it, but the new JWT is better.
-        // The old format is fallback supported by notification-service.
+        
         const legacyToken = 'token-' + user._id;
 
         return {
@@ -65,7 +62,7 @@ class UserService {
                 fullName: `${user.firstName} ${user.lastName}`.trim() || email,
                 role: user.role
             },
-            token: token // Using real JWT now
+            token: token 
         };
     }
 }

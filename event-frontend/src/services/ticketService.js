@@ -1,15 +1,7 @@
 // src/services/ticketService.js
 import { ticketApi } from './api';
 
-/* ── localStorage helpers ── */
-const KEY = 'myTickets';
-const loadTickets = () => {
-  try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
-  catch { return []; }
-};
-const saveTickets = (tickets) => localStorage.setItem(KEY, JSON.stringify(tickets));
-
-
+/* ── Book a ticket ──────────────────────────────────────────── */
 export const purchaseTicket = async ({
   eventId,
   eventTitle,
@@ -18,45 +10,62 @@ export const purchaseTicket = async ({
   eventDate,
   eventLocation,
 }) => {
- 
   const res = await ticketApi.post('/tickets', {
     eventId,
     seat,
-    userId:     userEmail,
-    eventTitle,             
+    userId:     userEmail,   // backend field name is `userId` but receives the email
+    eventTitle,
   });
-
-  const ticketId = res.data?._id || res.data?.ticketId || Date.now();
-
-  const tickets = loadTickets();
-  tickets.push({
-    ticketId,
-    eventId,
-    eventTitle:     eventTitle    || eventId,
-    seat,
-    status:         'Active',
-    ticketType:     'General',
-    eventStartDate: eventDate     || new Date().toISOString(),
-    eventLocation:  eventLocation || 'TBD',
-    quantity:       1,
-  });
-  saveTickets(tickets);
-
   return res;
 };
 
-export const getMyTickets = async () => ({ data: loadTickets() });
-
-export const cancelTicket = async (ticketId) => {
-  const tickets = loadTickets();
-  const t = tickets.find((t) => t.ticketId == ticketId);
-  if (t) t.status = 'Cancelled';
-  saveTickets(tickets);
-  return { data: { message: 'Cancelled' } };
+/* ── Get all tickets for the logged-in user ─────────────────── */
+export const getMyTickets = async () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (!user.email) return { data: [] };
+  const res = await ticketApi.get(`/tickets/user/${encodeURIComponent(user.email)}`);
+  // Normalise: backend returns plain array
+  const tickets = Array.isArray(res.data) ? res.data : [];
+  return {
+    data: tickets.map(t => ({
+      ticketId:       t._id || t.ticketId,
+      eventId:        t.eventId,
+      eventTitle:     t.eventTitle,
+      seat:           t.seat,
+      status:         t.status,
+      ticketType:     'General',
+      eventStartDate: t.eventDate || t.createdAt,
+      eventLocation:  t.eventLocation || '',
+      quantity:       1,
+    })),
+  };
 };
 
-export const getTicketById = async (ticketId) => ({
-  data: loadTickets().find((t) => t.ticketId == ticketId) || { ticketId, status: 'Active' },
-});
+/* ── Get a single ticket by ID ──────────────────────────────── */
+export const getTicketById = async (ticketId) => {
+  const res = await ticketApi.get(`/tickets/${ticketId}`);
+  const t   = res.data;
+  return {
+    data: {
+      ticketId:       t._id || t.ticketId,
+      eventId:        t.eventId,
+      eventTitle:     t.eventTitle,
+      seat:           t.seat,
+      status:         t.status,
+      ticketType:     'General',
+      eventStartDate: t.eventDate || t.createdAt,
+      eventLocation:  t.eventLocation || '',
+    },
+  };
+};
+
+/* ── Cancel a ticket ────────────────────────────────────────── */
+export const cancelTicket = async (ticketId) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const res  = await ticketApi.patch(`/tickets/${ticketId}/cancel`, {
+    userEmail: user.email,
+  });
+  return res;
+};
 
 export const scanTicket = () => Promise.resolve({ data: { status: 'CheckedIn' } });

@@ -7,7 +7,7 @@ async function extractUserInfo(req) {
     const raw = auth.replace('Bearer ', '').trim();
     const User = getUserModel();
 
-    // 1. Legacy Token Support
+    
     if (raw.startsWith('token-')) {
         const userId = raw.replace('token-', '');
         try {
@@ -21,7 +21,7 @@ async function extractUserInfo(req) {
         }
     }
 
-    // 2. JWT Support
+    // 2. JWT 
     try {
         const payload = JSON.parse(Buffer.from(raw.split('.')[1], 'base64').toString());
         const email = payload.email || payload.sub || null;
@@ -37,7 +37,7 @@ async function extractUserInfo(req) {
             };
         }
     } catch (e) {
-        // Fallthrough
+        
     }
 
     return {};

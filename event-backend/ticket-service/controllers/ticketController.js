@@ -1,29 +1,74 @@
 const ticketService = require('../services/ticketService');
 
 class TicketController {
+    /* ── POST /tickets ──────────────────────────────────────────── */
     async book(req, res, next) {
         try {
             const ticket = await ticketService.bookTicket(req.body);
             res.status(201).json({
-                message: 'Ticket booked successfully',
-                ticketId: ticket._id,
-                seat: ticket.seat,
+                message:    'Ticket booked successfully',
+                ticketId:   ticket._id,
+                seat:       ticket.seat,
                 eventTitle: ticket.eventTitle,
+                status:     ticket.status,
             });
-        } catch (error) {
-            if (error.message === 'User not found. Please register first.') {
-                return res.status(400).json({ error: error.message });
+        } catch (err) {
+            const knownErrors = [
+                'User not found. Please register first.',
+                'Event is fully booked',
+                'No seats available',
+                'Seat reservation failed',
+            ];
+            if (knownErrors.some(e => err.message.includes(e))) {
+                return res.status(400).json({ error: err.message });
             }
-            next(error);
+            next(err);
         }
     }
 
+    /* ── GET /tickets/user/:userEmail ───────────────────────────── */
     async getUserTickets(req, res, next) {
         try {
             const tickets = await ticketService.getUserTickets(req.params.userId);
             res.json(tickets);
-        } catch (error) {
-            next(error);
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    /* ── GET /tickets/:id ───────────────────────────────────────── */
+    async getById(req, res, next) {
+        try {
+            const ticket = await ticketService.getTicketById(req.params.id);
+            res.json(ticket);
+        } catch (err) {
+            if (err.message === 'Ticket not found') {
+                return res.status(404).json({ error: err.message });
+            }
+            next(err);
+        }
+    }
+
+    /* ── PATCH /tickets/:id/cancel ──────────────────────────────── */
+    async cancel(req, res, next) {
+        try {
+            const { userEmail } = req.body;
+            if (!userEmail) {
+                return res.status(400).json({ error: 'userEmail is required' });
+            }
+            const ticket = await ticketService.cancelTicket(req.params.id, userEmail);
+            res.json({ message: 'Ticket cancelled successfully', ticket });
+        } catch (err) {
+            if (err.message === 'Ticket not found') {
+                return res.status(404).json({ error: err.message });
+            }
+            if (err.message === 'Forbidden') {
+                return res.status(403).json({ error: err.message });
+            }
+            if (err.message === 'Ticket already cancelled') {
+                return res.status(409).json({ error: err.message });
+            }
+            next(err);
         }
     }
 }

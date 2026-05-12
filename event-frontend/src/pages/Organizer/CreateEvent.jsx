@@ -60,18 +60,20 @@ useEffect(() => {
     try {
       setLoading(true);
       const payload = {
-        categoryId:  form.categoryId,
-        title:       form.title,
-        description: form.description,
-        location:    form.location,
-        venueName:   form.venueName,
-        startDate:   new Date(form.startDate).toISOString(),
-        endDate:     new Date(form.endDate).toISOString(),
-        maxCapacity: Number(form.maxCapacity),
-        ticketPrice: Number(form.ticketPrice) || 0,
+        categoryId:   form.categoryId,
+        title:        form.title,
+        description:  form.description,
+        location:     form.location,
+        venueName:    form.venueName,
+        startDate:    new Date(form.startDate).toISOString(),
+        endDate:      new Date(form.endDate).toISOString(),
+        totalTickets: Number(form.maxCapacity),   // maps to totalTickets + availableSeats
+        maxCapacity:  Number(form.maxCapacity),   // kept for backward compat validator
+        ticketPrice:  Number(form.ticketPrice) || 0,
+        price:        Number(form.ticketPrice) || 0,
       };
-      const res = await createEvent(payload);
-      const eventId = res?.data?.eventId;
+      const res     = await createEvent(payload);
+      const eventId = res?.data?.event?._id || res?.data?.eventId;
       if (coverFile && eventId) {
         try { await uploadThumbnail(eventId, coverFile); } catch {}
       }
