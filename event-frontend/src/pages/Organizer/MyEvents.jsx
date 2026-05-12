@@ -1,10 +1,10 @@
 // src/pages/Organizer/MyEvents.jsx
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getMyEvents, deleteEvent } from '../../services/eventService';
 import './MyEvents.css';
 
-/* ── Toast ───────────────────────────────────────────────────── */
+/*  Toast  */
 function Toast({ msg, type, onDone }) {
   useEffect(() => {
     const t = setTimeout(onDone, 3000);
@@ -24,10 +24,11 @@ export default function MyEvents() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast]     = useState(null);
   const location              = useLocation();
+  const navigate              = useNavigate();
 
   const showToast = (msg, type = 'success') => setToast({ msg, type });
 
-  /* ── Load events ─────────────────────────────────────────── */
+  /* Load events*/
   useEffect(() => {
     setLoading(true);
     getMyEvents()
@@ -42,7 +43,7 @@ export default function MyEvents() {
       .finally(() => setLoading(false));
   }, [location.key]);
 
-  /* ── Delete ──────────────────────────────────────────────── */
+  /* Delete */
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this event? This action cannot be undone.')) return;
     try {
@@ -148,9 +149,15 @@ export default function MyEvents() {
                     </span>
                   </td>
 
-                  {/* Actions — Edit removed per requirements */}
+                  {/* Actions */}
                   <td>
                     <div className="me-actions">
+                      <button
+                        className="me-btn-action"
+                        onClick={() => navigate(`/organizer/${eventId}/edit`)}
+                      >
+                        ✏️ Edit
+                      </button>
                       <button
                         className="me-btn-action danger"
                         onClick={() => handleDelete(eventId)}

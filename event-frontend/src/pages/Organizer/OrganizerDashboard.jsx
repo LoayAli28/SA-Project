@@ -1,51 +1,55 @@
 // src/pages/Organizer/OrganizerDashboard.jsx
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { getOrganizerStats } from '../../services/eventService';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
 import './OrganizerDashboard.css';
 
 export default function OrganizerDashboard() {
   const { user }                    = useAuth();
   const [stats, setStats]           = useState(null);
   const [loading, setLoading]       = useState(true);
-  const [orgStatus, setOrgStatus]   = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const location                    = useLocation();
 
-  useEffect(() => { loadData(); }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setRefreshing(true);
+    
     try {
-      await api.get('/auth/me');
-      const res  = await getOrganizerStats();
-      setStats(res.data);
-      setOrgStatus('approved');
+      const res = await getOrganizerStats();
+      // Ensure we have the structure expected
+      if (res && res.data) {
+        setStats(res.data);
+      } else {
+        setStats({ totalEvents: 0, totalTicketsSold: 0, totalRevenue: 0, events: [] });
+      }
     } catch (err) {
-      const msg = err.response?.data?.message || '';
-      if (msg.includes('approved')) setOrgStatus('pending');
+      console.error('[Dashboard] Error fetching stats:', err);
       setStats({ totalEvents: 0, totalTicketsSold: 0, totalRevenue: 0, events: [] });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
-  if (loading) return <div className="page-container flex-center"><div className="spinner" /></div>;
+  // Refresh on mount and whenever we navigate back to this page
+  useEffect(() => {
+    loadData();
+    
+    // Polling for real-time updates (every 20 seconds)
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 20000);
+    
+    return () => clearInterval(interval);
+  }, [loadData, location.key]);
 
-  /* ── Pending banner ─────────────────────────────────────────── */
-  if (orgStatus === 'pending') {
-    return (
-      <div className="page-container">
-        <div className="org-pending-banner">
-          <div className="org-pending-icon">⏳</div>
-          <h2>Account Pending Approval</h2>
-          <p>Your organizer account is under review. You'll be notified once approved.</p>
-          <p className="org-pending-user">
-            Logged in as: <strong>{user?.fullName}</strong> ({user?.email})
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="page-container flex-center">
+      <div className="spinner" />
+    </div>
+  );
 
   const {
     totalEvents       = 0,
@@ -63,68 +67,55 @@ export default function OrganizerDashboard() {
       {/* Header */}
       <div className="org-header">
         <div>
-          <h1>Event Management</h1>
-          <p>Welcome, {user?.fullName}</p>
+          <h1>Organizer Dashboard</h1>
+          <p>Real-time analytics for <span className="highlight">{user?.email}</span></p>
         </div>
-        <Link to="/organizer/create" className="org-create-btn">+ Create Event</Link>
+        <div className="org-header-actions">
+           {refreshing && <span className="org-refreshing-tag">Updating Live...</span>}
+           <button className="org-refresh-btn" onClick={() => loadData(false)} title="Refresh Now">🔄</button>
+           <Link to="/organizer/create" className="org-create-btn">+ New Event</Link>
+        </div>
       </div>
 
-      {/* Stats */}
+      {/* Analytics Cards */}
       <div className="org-stats">
         <div className="org-stat-card">
-          <div>Total Events</div>
-          <h2>{totalEvents}</h2>
+          <div className="org-stat-icon">📅</div>
+          <div className="org-stat-content">
+            <div className="org-stat-label">Total Events</div>
+            <h2 className="org-stat-value">{totalEvents}</h2>
+          </div>
         </div>
         <div className="org-stat-card">
-          <div>Tickets Sold</div>
-          <h2>{totalTicketsSold}</h2>
+          <div className="org-stat-icon">🎟️</div>
+          <div className="org-stat-content">
+            <div className="org-stat-label">Tickets Sold</div>
+            <h2 className="org-stat-value">{totalTicketsSold}</h2>
+          </div>
         </div>
         <div className="org-stat-card">
-          <div>Total Revenue</div>
-          <h2>${totalRevenue.toLocaleString()}</h2>
-        </div>
-        <div className="org-stat-card">
-          <div>Active Events</div>
-          <h2>{events.length}</h2>
+          <div className="org-stat-icon">💰</div>
+          <div className="org-stat-content">
+            <div className="org-stat-label">Total Revenue</div>
+            <h2 className="org-stat-value">${totalRevenue.toLocaleString()}</h2>
+          </div>
         </div>
       </div>
 
-      {/* Recent Events */}
+      {/* Detailed Performance Table */}
       <div className="org-section-header">
-        <h3>Recent Managed Events</h3>
-        <Link to="/organizer/events" className="org-view-all">View All</Link>
+        <h3>Event Breakdown</h3>
+        <Link to="/organizer/events" className="org-view-all">Manage All Events →</Link>
       </div>
 
-      <div className="org-events-table">
+      <div className="org-analytics">
         {events.length === 0 ? (
           <div className="org-table-empty">
-            <p>No events yet. <Link to="/organizer/create">Create your first event →</Link></p>
+            <p>No event data found for your account.</p>
+            <Link to="/organizer/create" className="btn-primary" style={{marginTop:'15px', display:'inline-block'}}>Create First Event</Link>
           </div>
         ) : (
-          events.slice(0, 3).map(e => (
-            <div key={e._id} className="org-table-row">
-              <div>
-                <div className="org-event-name">{e.title || 'Untitled'}</div>
-                <div className="org-event-date">{formatDate(e.date)}</div>
-              </div>
-              <div className="org-event-venue">{e.location || '-'}</div>
-              <div>
-                <span className="org-badge org-badge-approved">
-                  {e.ticketsSold} / {e.totalTickets} booked
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Analytics */}
-      {events.length > 0 && (
-        <>
-          <div className="org-section-header">
-            <h3>Event Analytics</h3>
-          </div>
-          <div className="org-analytics">
+          <div className="org-analytics-grid">
             <div className="org-analytics-head">
               <span>Event</span>
               <span>Tickets Sold</span>
@@ -133,35 +124,35 @@ export default function OrganizerDashboard() {
             </div>
             {events.map(e => (
               <div key={e._id} className="org-analytics-row">
-                <div>
+                <div className="org-event-info">
                   <div className="org-analytics-event-name">{e.title}</div>
-                  <div className="org-analytics-event-cat">
-                    {e.category}{e.date ? ` • ${formatDate(e.date)}` : ''}
+                  <div className="org-analytics-event-cat">{e.location} • {formatDate(e.date)}</div>
+                </div>
+                <div className="org-stat-mini">
+                  <span className="org-analytics-val">{e.ticketsSold}</span>
+                  <span className="org-subtext">booked</span>
+                </div>
+                <div className="org-stat-mini">
+                  <span className="org-analytics-val success">${(e.revenue || 0).toLocaleString()}</span>
+                  <span className="org-subtext">gross</span>
+                </div>
+                <div className="org-progress-container">
+                  <div className="org-progress-info">
+                    <span>{e.occupancyPct || 0}%</span>
+                    <span>{e.totalTickets - e.ticketsSold} remaining</span>
                   </div>
-                </div>
-                <div>
-                  <span className="org-analytics-val orange">{e.ticketsSold}</span>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    {' '}/ {e.totalTickets}
-                  </span>
-                </div>
-                <div>
-                  <span className="org-analytics-val green">${(e.revenue || 0).toLocaleString()}</span>
-                </div>
-                <div className="org-progress-wrap">
                   <div className="org-progress-bar">
                     <div
                       className="org-progress-fill"
                       style={{ width: `${e.occupancyPct || 0}%` }}
                     />
                   </div>
-                  <span className="org-progress-pct">{e.occupancyPct || 0}%</span>
                 </div>
               </div>
             ))}
           </div>
-        </>
-      )}
+        )}
+      </div>
 
     </div>
   );

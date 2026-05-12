@@ -1,7 +1,6 @@
 const ticketService = require('../services/ticketService');
 
 class TicketController {
-    /* ── POST /tickets ──────────────────────────────────────────── */
     async book(req, res, next) {
         try {
             const ticket = await ticketService.bookTicket(req.body);
@@ -13,6 +12,9 @@ class TicketController {
                 status:     ticket.status,
             });
         } catch (err) {
+            if (err.message === 'Seat already booked') {
+                return res.status(409).json({ error: err.message });
+            }
             const knownErrors = [
                 'User not found. Please register first.',
                 'Event is fully booked',
@@ -26,7 +28,6 @@ class TicketController {
         }
     }
 
-    /* ── GET /tickets/user/:userEmail ───────────────────────────── */
     async getUserTickets(req, res, next) {
         try {
             const tickets = await ticketService.getUserTickets(req.params.userId);
@@ -36,7 +37,6 @@ class TicketController {
         }
     }
 
-    /* ── GET /tickets/:id ───────────────────────────────────────── */
     async getById(req, res, next) {
         try {
             const ticket = await ticketService.getTicketById(req.params.id);
@@ -49,7 +49,6 @@ class TicketController {
         }
     }
 
-    /* ── PATCH /tickets/:id/cancel ──────────────────────────────── */
     async cancel(req, res, next) {
         try {
             const { userEmail } = req.body;

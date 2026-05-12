@@ -1,7 +1,6 @@
 const eventService = require('../services/eventService');
 
 class EventController {
-    /* ── GET /events ───────────────────────────────────────────── */
     async getAll(req, res, next) {
         try {
             const events = await eventService.getAllEvents();
@@ -11,7 +10,6 @@ class EventController {
         }
     }
 
-    /* ── GET /events/:id ───────────────────────────────────────── */
     async getById(req, res, next) {
         try {
             const event = await eventService.getEventById(req.params.id);
@@ -24,7 +22,6 @@ class EventController {
         }
     }
 
-    /* ── POST /events ──────────────────────────────────────────── */
     async create(req, res, next) {
         try {
             const newEvent = await eventService.createEvent(req.body);
@@ -37,7 +34,21 @@ class EventController {
         }
     }
 
-    /* ── DELETE /events/:id ────────────────────────────────────── */
+    async update(req, res, next) {
+        try {
+            const updatedEvent = await eventService.updateEvent(req.params.id, req.body);
+            res.json({ message: 'Event updated successfully', event: updatedEvent });
+        } catch (err) {
+            if (err.message === 'Event not found') {
+                return res.status(404).json({ error: err.message });
+            }
+            if (err.message.includes('Cannot reduce capacity')) {
+                return res.status(400).json({ error: err.message });
+            }
+            next(err);
+        }
+    }
+
     async delete(req, res, next) {
         try {
             await eventService.deleteEvent(req.params.id);
@@ -50,7 +61,6 @@ class EventController {
         }
     }
 
-    /* ── PATCH /events/:id/decrement-seat  (called by ticket-service) ── */
     async decrementSeat(req, res, next) {
         try {
             const event = await eventService.decrementSeat(req.params.id);
@@ -63,17 +73,16 @@ class EventController {
         }
     }
 
-    /* ── PATCH /events/:id/increment-seat  (called on cancellation) ── */
     async incrementSeat(req, res, next) {
         try {
             const event = await eventService.incrementSeat(req.params.id);
+            if (!event) return res.status(404).json({ error: 'Event not found or seat count error' });
             res.json({ availableSeats: event.availableSeats });
         } catch (err) {
             next(err);
         }
     }
 
-    /* ── GET /events/organizer/:email ──────────────────────────── */
     async getByOrganizer(req, res, next) {
         try {
             const events = await eventService.getEventsByOrganizer(req.params.email);
@@ -83,7 +92,6 @@ class EventController {
         }
     }
 
-    /* ── GET /events/stats/:email  (dashboard aggregation) ─────── */
     async getOrganizerStats(req, res, next) {
         try {
             const stats = await eventService.getOrganizerStats(req.params.email);

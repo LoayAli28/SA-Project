@@ -7,7 +7,7 @@ const env      = require('../config/env');
 const eventApi = axios.create({ baseURL: env.EVENT_SERVICE_URL });
 
 class TicketService {
-    /* ─────────────────────────── BOOK ─────────────────────────── */
+    
 
     async bookTicket(data) {
         const { eventId, eventTitle, seat, userId } = data;
@@ -17,7 +17,13 @@ class TicketService {
         const userDoc = await User.findOne({ email: userId });
         if (!userDoc) throw new Error('User not found. Please register first.');
 
-        // 2. Atomically decrement seat in event-service
+        // 2. Check if seat is already taken (pre-check)
+        const existingTicket = await Ticket.findOne({ eventId, seat, status: 'Active' });
+        if (existingTicket) {
+            throw new Error('Seat already booked');
+        }
+
+        // 3. Atomically decrement seat in event-service
         try {
             await eventApi.patch(`/events/${eventId}/decrement-seat`);
         } catch (err) {
@@ -25,30 +31,39 @@ class TicketService {
             throw new Error(msg);
         }
 
-        // 3. Persist ticket
-        const ticket = await Ticket.create({
-            eventId,
-            eventTitle: eventTitle || eventId,
-            seat,
-            userId:    userDoc._id.toString(),
-            userEmail: userId,
-            status:    'Active',
-        });
+        // 4. Persist ticket
+        try {
+            const ticket = await Ticket.create({
+                eventId,
+                eventTitle: eventTitle || eventId,
+                seat,
+                userId:    userDoc._id.toString(),
+                userEmail: userId,
+                status:    'Active',
+            });
 
-        // 4. Publish Kafka event
-        await producer.publishEvent('TicketBooked', {
-            ticketId:   ticket._id.toString(),
-            eventId,
-            eventTitle: ticket.eventTitle,
-            seat,
-            userId:     userDoc._id.toString(),
-            userEmail:  userId,
-        });
+            // 5. Publish Kafka event
+            await producer.publishEvent('TicketBooked', {
+                ticketId:   ticket._id.toString(),
+                eventId,
+                eventTitle: ticket.eventTitle,
+                seat,
+                userId:     userDoc._id.toString(),
+                userEmail:  userId,
+            });
 
-        return ticket;
+            return ticket;
+        } catch (err) {
+            // If creation fails increment back
+            await eventApi.patch(`/events/${eventId}/increment-seat`).catch(console.error);
+            
+            if (err.code === 11000) {
+                throw new Error('Seat already booked');
+            }
+            throw err;
+        }
     }
 
-    /* ─────────────────────────── CANCEL ───────────────────────── */
 
     async cancelTicket(ticketId, userEmail) {
         const ticket = await Ticket.findById(ticketId);
@@ -59,7 +74,7 @@ class TicketService {
         ticket.status = 'Cancelled';
         await ticket.save();
 
-        // Restore seat in event-service (best-effort, non-fatal)
+        // Restore seat in event-service
         try {
             await eventApi.patch(`/events/${ticket.eventId}/increment-seat`);
         } catch (err) {
@@ -79,7 +94,6 @@ class TicketService {
         return ticket;
     }
 
-    /* ─────────────────────────── READS ────────────────────────── */
 
     async getUserTickets(userEmail) {
         return await Ticket.find({ userEmail }).sort({ createdAt: -1 });
@@ -89,12 +103,6 @@ class TicketService {
         const ticket = await Ticket.findById(ticketId);
         if (!ticket) throw new Error('Ticket not found');
         return ticket;
-    }
-
-    /* ──────────────── STATS PER EVENT (for organizer) ─────────── */
-
-    async countByEvent(eventId) {
-        return await Ticket.countDocuments({ eventId, status: { $ne: 'Cancelled' } });
     }
 }
 

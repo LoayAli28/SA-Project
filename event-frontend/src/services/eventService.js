@@ -33,7 +33,7 @@ export const getOrganizerStats = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   if (!user.email) return Promise.resolve({ data: { totalEvents: 0, totalTicketsSold: 0, totalRevenue: 0, events: [] } });
   return eventApi
-    .get(`/events/stats/${encodeURIComponent(user.email)}`)
+    .get(`/events/organizer/dashboard-stats/${encodeURIComponent(user.email)}`)
     .catch(() => ({ data: { totalEvents: 0, totalTicketsSold: 0, totalRevenue: 0, events: [] } }));
 };
 
@@ -46,9 +46,9 @@ export const createEvent = (data) => {
   });
 };
 
+export const updateEvent = (id, data) => eventApi.put(`/events/${id}`, data);
+
 export const deleteEvent = (id) => eventApi.delete(`/events/${id}`);
 
-// Stub – edit is removed from UI
-export const updateEvent      = (id, data) => Promise.resolve({ data });
 export const uploadThumbnail  = ()          => Promise.resolve({});
 export const uploadAttachment = ()          => Promise.resolve({});

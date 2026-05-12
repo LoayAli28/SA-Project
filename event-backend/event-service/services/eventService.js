@@ -33,14 +33,50 @@ class EventService {
             organizerEmail: data.organizerEmail,
             category:       data.categoryId || data.category || 'Other',
             totalTickets,
-            availableSeats: totalTickets,  // initialise = capacity
+            availableSeats: totalTickets,
         });
 
         await producer.publishEvent('EventCreated', {
             id:             event._id.toString(),
             title:          event.title,
             organizerEmail: event.organizerEmail,
-            organizerId:    event.organizerEmail,
+        });
+
+        return event;
+    }
+
+    /* ─────────────────────────── UPDATE ───────────────────────────────── */
+
+    async updateEvent(id, data) {
+        const event = await Event.findById(id);
+        if (!event) throw new Error('Event not found');
+
+        const oldTotal = event.totalTickets;
+        const oldAvail = event.availableSeats;
+        const booked   = oldTotal - oldAvail;
+
+        if (data.totalTickets !== undefined) {
+            const newTotal = Number(data.totalTickets);
+            if (newTotal < booked) {
+                throw new Error(`Cannot reduce capacity below already booked seats (${booked})`);
+            }
+            event.totalTickets = newTotal;
+            event.availableSeats = newTotal - booked;
+        }
+
+        if (data.title)       event.title = data.title;
+        if (data.description) event.description = data.description;
+        if (data.location)    event.location = data.location;
+        if (data.date)        event.date = data.date;
+        if (data.price !== undefined) event.price = Number(data.price);
+        if (data.category)    event.category = data.category;
+
+        await event.save();
+
+        await producer.publishEvent('EventUpdated', {
+            id:             event._id.toString(),
+            title:          event.title,
+            organizerEmail: event.organizerEmail,
         });
 
         return event;
@@ -48,10 +84,6 @@ class EventService {
 
     /* ─────────────────────────── UPDATE SEATS ─────────────────────────── */
 
-    /**
-     * Atomically decrement availableSeats by 1.
-     * Returns the updated event, or throws if already full.
-     */
     async decrementSeat(eventId) {
         const event = await Event.findOneAndUpdate(
             { _id: eventId, availableSeats: { $gt: 0 } },
@@ -62,23 +94,13 @@ class EventService {
         return event;
     }
 
-    /**
-     * Atomically increment availableSeats by 1 (on cancellation).
-     */
     async incrementSeat(eventId) {
+        // Guard against exceeding totalTickets
         const event = await Event.findOneAndUpdate(
             { _id: eventId, $expr: { $lt: ['$availableSeats', '$totalTickets'] } },
             { $inc: { availableSeats: 1 } },
             { new: true }
         );
-        if (!event) {
-            // Edge-case: simply increment without the guard (shouldn't exceed capacity in normal flow)
-            return await Event.findByIdAndUpdate(
-                eventId,
-                { $inc: { availableSeats: 1 } },
-                { new: true }
-            );
-        }
         return event;
     }
 
@@ -99,37 +121,39 @@ class EventService {
 
     /* ─────────────────────── DASHBOARD STATS ──────────────────────────── */
 
-    /**
-     * Aggregate statistics for a given organiser.
-     * Returns: { totalEvents, totalTicketsSold, totalRevenue, events[] }
-     */
     async getOrganizerStats(organizerEmail) {
-        const events = await Event.find({ organizerEmail }).lean();
+        const stats = await Event.aggregate([
+            { $match: { organizerEmail } },
+            {
+                $group: {
+                    _id: null,
+                    totalEvents:      { $sum: 1 },
+                    totalTicketsSold: { $sum: { $subtract: ['$totalTickets', '$availableSeats'] } },
+                    totalRevenue:     { $sum: { $multiply: [{ $subtract: ['$totalTickets', '$availableSeats'] }, '$price'] } },
+                    events:           { $push: '$$ROOT' }
+                }
+            }
+        ]);
 
-        let totalTicketsSold = 0;
-        let totalRevenue     = 0;
+        if (stats.length === 0) {
+            return { totalEvents: 0, totalTicketsSold: 0, totalRevenue: 0, events: [] };
+        }
 
-        const enriched = events.map(e => {
-            const sold    = (e.totalTickets || 0) - (e.availableSeats || 0);
-            const revenue = sold * (e.price || 0);
-            totalTicketsSold += sold;
-            totalRevenue     += revenue;
+        const result = stats[0];
+        delete result._id;
+
+        // Add occupancy and ticketsSold to each event
+        result.events = result.events.map(e => {
+            const sold = e.totalTickets - e.availableSeats;
             return {
                 ...e,
-                ticketsSold:    sold,
-                revenue,
-                occupancyPct:   e.totalTickets > 0
-                    ? Math.round((sold / e.totalTickets) * 100)
-                    : 0,
+                ticketsSold:  sold,
+                occupancyPct: e.totalTickets > 0 ? Math.round((sold / e.totalTickets) * 100) : 0,
+                revenue:      sold * e.price
             };
         });
 
-        return {
-            totalEvents:      events.length,
-            totalTicketsSold,
-            totalRevenue,
-            events:           enriched,
-        };
+        return result;
     }
 }
 

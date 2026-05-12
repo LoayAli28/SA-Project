@@ -30,6 +30,7 @@ class KafkaConsumerService {
             'TicketCancelled',
             'UserRegistered',
             'EventCreated',
+            'EventUpdated',
             'EventDeleted',
         ];
 
@@ -66,46 +67,30 @@ class KafkaConsumerService {
                 break;
 
             case 'TicketCancelled':
-                // Notify participant
                 await notificationService.createNotification({
                     userId:    data.userId || data.userEmail,
                     userEmail: data.userEmail || '',
                     type:      'Information',
                     title:     '❌ Ticket Cancelled',
-                    message:   `Your ticket for "${data.eventTitle}" (Seat ${data.seat}) has been cancelled and your seat has been released.`,
+                    message:   `Your ticket for "${data.eventTitle}" (Seat ${data.seat}) has been cancelled.`,
                     relatedId: data.ticketId,
                 });
-                // Notify organizer (optional enhancement)
-                if (data.organizerEmail) {
-                    await notificationService.createNotification({
-                        userId:    data.organizerEmail,
-                        userEmail: data.organizerEmail,
-                        type:      'Information',
-                        title:     '📤 Seat Released',
-                        message:   `A participant cancelled their ticket for "${data.eventTitle}" — 1 seat is now available again.`,
-                        relatedId: data.eventId,
-                    });
-                }
                 break;
 
-            case 'UserRegistered': {
-                const userId = data.id || data.userId;
-                const email  = data.email;
+            case 'UserRegistered':
                 await notificationService.createNotification({
-                    userId:    userId || email,
-                    userEmail: email || '',
+                    userId:    data.id || data.userId || data.email,
+                    userEmail: data.email || '',
                     type:      'Information',
                     title:     '👋 Welcome to Eventra!',
-                    message:   `Hi ${data.fullName || email}, your account has been created successfully.`,
-                    relatedId: userId,
+                    message:   `Hi ${data.fullName || data.email}, your account has been created successfully.`,
+                    relatedId: data.id,
                 });
                 break;
-            }
 
-            case 'EventCreated': {
-                const organizerId = data.organizerId || data.organizerEmail || data.id;
+            case 'EventCreated':
                 await notificationService.createNotification({
-                    userId:    organizerId,
+                    userId:    data.organizerEmail || data.id,
                     userEmail: data.organizerEmail || '',
                     type:      'EventApproved',
                     title:     '✅ Event Created',
@@ -113,12 +98,21 @@ class KafkaConsumerService {
                     relatedId: data.id,
                 });
                 break;
-            }
 
-            case 'EventDeleted': {
-                const organizerId = data.organizerEmail || data.id;
+            case 'EventUpdated':
                 await notificationService.createNotification({
-                    userId:    organizerId,
+                    userId:    data.organizerEmail || data.id,
+                    userEmail: data.organizerEmail || '',
+                    type:      'Information',
+                    title:     '✏️ Event Updated',
+                    message:   `Your event "${data.title}" has been updated successfully.`,
+                    relatedId: data.id,
+                });
+                break;
+
+            case 'EventDeleted':
+                await notificationService.createNotification({
+                    userId:    data.organizerEmail || data.id,
                     userEmail: data.organizerEmail || '',
                     type:      'Information',
                     title:     '🗑 Event Deleted',
@@ -126,7 +120,6 @@ class KafkaConsumerService {
                     relatedId: data.id,
                 });
                 break;
-            }
 
             default:
                 console.log(`[Kafka] Unhandled topic: ${topic}`);
